@@ -52,8 +52,6 @@ CREATE TABLE `members` (
   `name` varchar(255) NOT NULL,
   `sex` int(11) NOT NULL,
   `address` varchar(500) DEFAULT NULL,
-  `dob` date DEFAULT NULL,
-  `doj` date DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

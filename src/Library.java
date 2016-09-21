@@ -1,21 +1,19 @@
 
-import java.awt.Component;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.swing.JOptionPane;
-import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import javax.swing.table.DefaultTableModel;
 
 public class Library extends javax.swing.JFrame {
-
+    
     MySqlConnection conn = new MySqlConnection("library");
-
+    
     private String loggedInUser = "";
-
+    
     public Library() {
         initComponents();
     }
-
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -37,15 +35,11 @@ public class Library extends javax.swing.JFrame {
         txtAddMemb_Name = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
-        jRadioButton1 = new javax.swing.JRadioButton();
-        jRadioButton2 = new javax.swing.JRadioButton();
+        radAddMemb_Male = new javax.swing.JRadioButton();
+        radAddMemb_Female = new javax.swing.JRadioButton();
         jLabel8 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
-        jLabel9 = new javax.swing.JLabel();
-        txtAddMemb_Day = new javax.swing.JTextField();
-        txtMembAdd_Year = new javax.swing.JTextField();
-        cmbMembAdd_Month = new javax.swing.JComboBox();
+        txtAddMemb_Addr = new javax.swing.JTextArea();
         btnAddMemb_Add = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
@@ -53,6 +47,9 @@ public class Library extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         cmdLogin = new javax.swing.JButton();
         txtPassword = new javax.swing.JPasswordField();
+
+        frmMain.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        frmMain.setResizable(false);
 
         lblMain_Welcome.setFont(new java.awt.Font("Old English Text MT", 1, 36)); // NOI18N
         lblMain_Welcome.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -80,6 +77,11 @@ public class Library extends javax.swing.JFrame {
         mnuMain_MembMgmt.setText("Member Management");
 
         mnuMain_AddMemb.setText("Add Member");
+        mnuMain_AddMemb.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuMain_AddMembActionPerformed(evt);
+            }
+        });
         mnuMain_MembMgmt.add(mnuMain_AddMemb);
 
         mnuMain_DelMemb.setText("Delete Member");
@@ -128,17 +130,18 @@ public class Library extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        frmMain.pack();
-        frmMain.setLocationRelativeTo(null);
+        frmMain.pack(); frmMain.setLocationRelativeTo(null);
+
+        frmAddMember.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        frmAddMember.setResizable(false);
+        frmAddMember.addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                frmAddMemberWindowClosed(evt);
+            }
+        });
 
         jLabel5.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel5.setText("Name");
-
-        txtAddMemb_Name.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtAddMemb_NameKeyTyped(evt);
-            }
-        });
 
         jLabel6.setFont(new java.awt.Font("Old English Text MT", 1, 36)); // NOI18N
         jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -147,34 +150,26 @@ public class Library extends javax.swing.JFrame {
         jLabel7.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel7.setText("Sex");
 
-        jRadioButton1.setText("Male");
+        radAddMemb_Male.setSelected(true);
+        radAddMemb_Male.setText("Male");
 
-        jRadioButton2.setText("Female");
+        radAddMemb_Female.setText("Female");
 
         jLabel8.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel8.setText("Address");
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane2.setViewportView(jTextArea1);
-
-        jLabel9.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jLabel9.setText("Date of Birth");
-
-        txtAddMemb_Day.setForeground(new java.awt.Color(204, 204, 204));
-        txtAddMemb_Day.setText("Day");
-        txtAddMemb_Day.setMinimumSize(new java.awt.Dimension(6, 25));
-        txtAddMemb_Day.setPreferredSize(new java.awt.Dimension(25, 25));
-
-        txtMembAdd_Year.setForeground(new java.awt.Color(204, 204, 204));
-        txtMembAdd_Year.setText("Year");
-        txtMembAdd_Year.setMinimumSize(new java.awt.Dimension(6, 25));
-        txtMembAdd_Year.setPreferredSize(new java.awt.Dimension(25, 25));
-
-        cmbMembAdd_Month.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }));
-        cmbMembAdd_Month.setSelectedIndex(-1);
+        txtAddMemb_Addr.setColumns(20);
+        txtAddMemb_Addr.setLineWrap(true);
+        txtAddMemb_Addr.setRows(5);
+        txtAddMemb_Addr.setWrapStyleWord(true);
+        jScrollPane2.setViewportView(txtAddMemb_Addr);
 
         btnAddMemb_Add.setText("Add Member");
+        btnAddMemb_Add.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddMemb_AddActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout frmAddMemberLayout = new javax.swing.GroupLayout(frmAddMember.getContentPane());
         frmAddMember.getContentPane().setLayout(frmAddMemberLayout);
@@ -193,27 +188,18 @@ public class Library extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(frmAddMemberLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(frmAddMemberLayout.createSequentialGroup()
-                                .addComponent(jRadioButton1)
+                                .addComponent(radAddMemb_Male)
                                 .addGap(47, 47, 47)
-                                .addComponent(jRadioButton2))
+                                .addComponent(radAddMemb_Female))
                             .addComponent(txtAddMemb_Name, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(69, 69, 69))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, frmAddMemberLayout.createSequentialGroup()
-                        .addGroup(frmAddMemberLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel8)
-                            .addComponent(jLabel9))
+                        .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(frmAddMemberLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(frmAddMemberLayout.createSequentialGroup()
-                                .addComponent(txtAddMemb_Day, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(cmbMembAdd_Month, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtMembAdd_Year, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(53, 53, 53))))
             .addGroup(frmAddMemberLayout.createSequentialGroup()
-                .addGap(201, 201, 201)
+                .addGap(195, 195, 195)
                 .addComponent(btnAddMemb_Add)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
@@ -222,43 +208,29 @@ public class Library extends javax.swing.JFrame {
             .addGroup(frmAddMemberLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(43, 43, 43)
+                .addGap(18, 18, 18)
                 .addGroup(frmAddMemberLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtAddMemb_Name, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(frmAddMemberLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
-                    .addComponent(jRadioButton1)
-                    .addComponent(jRadioButton2))
+                    .addComponent(radAddMemb_Male)
+                    .addComponent(radAddMemb_Female))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(frmAddMemberLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel8)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(frmAddMemberLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtAddMemb_Day, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtMembAdd_Year, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel9)
-                    .addComponent(cmbMembAdd_Month, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnAddMemb_Add)
-                .addContainerGap(22, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        cmbMembAdd_Month.setRenderer(new BasicComboBoxRenderer() {
-            @Override
-            public Component getListCellRendererComponent(javax.swing.JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                if (value == null || index == -1) {
-                    return super.getListCellRendererComponent(list, "Month", index, isSelected, cellHasFocus);
-                } else {
-                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                }
-            }
-        });
+        frmAddMember.pack();  frmAddMember.setLocationRelativeTo(null);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setLocationByPlatform(true);
+        setResizable(false);
 
         jLabel1.setFont(new java.awt.Font("Lucida Handwriting", 1, 24)); // NOI18N
         jLabel1.setText("Library Management Project");
@@ -322,10 +294,8 @@ public class Library extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdLoginActionPerformed
-
         String username = txtUsername.getText();
         String password = txtPassword.getText();
-
         // Check the username and password against the database
         try {
             ResultSet rs = conn.query("select * from users where lcase(username) ='" + username.toLowerCase() + "' and password = '" + password + "';");
@@ -344,15 +314,41 @@ public class Library extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }//GEN-LAST:event_cmdLoginActionPerformed
-
+    
     private void txtMain_SearchBookKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtMain_SearchBookKeyTyped
         populateBookListTable(txtMain_SearchBook.getText().trim() + ((Character) evt.getKeyChar()).toString());
     }//GEN-LAST:event_txtMain_SearchBookKeyTyped
-
-    private void txtAddMemb_NameKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtAddMemb_NameKeyTyped
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtAddMemb_NameKeyTyped
-
+    
+    private void btnAddMemb_AddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddMemb_AddActionPerformed
+        String name = txtAddMemb_Name.getText().trim();
+        int sex = radAddMemb_Male.isSelected() == true ? 0 : 1;
+        String address = txtAddMemb_Addr.getText().trim();
+        if (name.isEmpty() || address.isEmpty()) {
+            JOptionPane.showMessageDialog(frmAddMember, "Name and Address should not be left empty!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        try {
+            conn.update("insert into members values(null, '" + name + "', '" + sex + "', '" + address + "');"); // Passing null for the primary key will result in auto-increment of id
+            JOptionPane.showMessageDialog(frmAddMember, "Successfully added new member to database!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            frmAddMember.setVisible(false);
+            frmMain.setVisible(true);
+            frmMain.setLocationRelativeTo(null);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(frmAddMember, "Unknown database error. Failed to add new member.", "Database Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_btnAddMemb_AddActionPerformed
+    
+    private void mnuMain_AddMembActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuMain_AddMembActionPerformed
+        frmAddMember.setVisible(true);
+        frmAddMember.setLocationRelativeTo(null);
+        frmMain.setVisible(false);
+    }//GEN-LAST:event_mnuMain_AddMembActionPerformed
+    
+    private void frmAddMemberWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_frmAddMemberWindowClosed
+        frmMain.setVisible(true);
+    }//GEN-LAST:event_frmAddMemberWindowClosed
+    
     private void populateBookListTable(String wildcard) {
         clearBookListTable();
         if (wildcard.trim().compareTo("") == 0) {
@@ -368,11 +364,11 @@ public class Library extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }
-
+    
     private void clearBookListTable() {
         ((DefaultTableModel) tblMain_BookList.getModel()).setRowCount(0);
     }
-
+    
     public static void main(String args[]) {
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -404,7 +400,6 @@ public class Library extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddMemb_Add;
-    private javax.swing.JComboBox cmbMembAdd_Month;
     private javax.swing.JButton cmdLogin;
     private javax.swing.JFrame frmAddMember;
     private javax.swing.JFrame frmMain;
@@ -416,24 +411,21 @@ public class Library extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JLabel lblMain_Welcome;
     private javax.swing.JMenuItem mnuMain_AddMemb;
     private javax.swing.JMenuItem mnuMain_DelMemb;
     private javax.swing.JMenu mnuMain_MembMgmt;
     private javax.swing.JMenuItem mnuMain_ViewMemb;
+    private javax.swing.JRadioButton radAddMemb_Female;
+    private javax.swing.JRadioButton radAddMemb_Male;
     private javax.swing.JTable tblMain_BookList;
-    private javax.swing.JTextField txtAddMemb_Day;
+    private javax.swing.JTextArea txtAddMemb_Addr;
     private javax.swing.JTextField txtAddMemb_Name;
     private javax.swing.JTextField txtMain_SearchBook;
-    private javax.swing.JTextField txtMembAdd_Year;
     private javax.swing.JPasswordField txtPassword;
     private javax.swing.JTextField txtUsername;
     // End of variables declaration//GEN-END:variables
