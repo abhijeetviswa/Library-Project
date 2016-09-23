@@ -51,9 +51,10 @@ CREATE TABLE `members` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `sex` int(11) NOT NULL,
-  `address` varchar(500) DEFAULT NULL,
+  `address` varchar(500) NOT NULL,
+  `phone` int(10) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
 /*Table structure for table `users` */
 
