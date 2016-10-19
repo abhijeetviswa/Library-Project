@@ -3,6 +3,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Vector;
+import java.util.Date;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
@@ -14,6 +16,8 @@ public class Library extends javax.swing.JFrame {
     MySqlConnection conn = new MySqlConnection("library");
 
     private String loggedInUser = "";
+    private int curBookEdit = 0;  // The current book being edited
+    private int bookAddOrEdit = -1; // 0 = add, 1 = edit
 
     public Library() {
         initComponents();
@@ -33,7 +37,13 @@ public class Library extends javax.swing.JFrame {
         mnuMain_MembMgmt = new javax.swing.JMenu();
         mnuMain_AddMemb = new javax.swing.JMenuItem();
         mnuMain_ViewMemb = new javax.swing.JMenuItem();
-        jMenu2 = new javax.swing.JMenu();
+        mnuMain_BookMgmt = new javax.swing.JMenu();
+        mnuMain_AddBook = new javax.swing.JMenuItem();
+        mnuMain_DelBook = new javax.swing.JMenuItem();
+        mnuMain_EditBook = new javax.swing.JMenuItem();
+        mnuMain_IssueBook = new javax.swing.JMenuItem();
+        mnuMain_ReturnBook = new javax.swing.JMenuItem();
+        mnuBookMgmt_Refresh = new javax.swing.JMenuItem();
         frmAddMember = new javax.swing.JFrame();
         jLabel5 = new javax.swing.JLabel();
         txtAddMemb_Name = new javax.swing.JTextField();
@@ -60,10 +70,26 @@ public class Library extends javax.swing.JFrame {
         jScrollPane4 = new javax.swing.JScrollPane();
         txtViewMemb_Addr = new javax.swing.JTextArea();
         jLabel13 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        btnViewMember_Update = new javax.swing.JButton();
+        btnViewMember_Delete = new javax.swing.JButton();
         jLabel14 = new javax.swing.JLabel();
         txtViewMemb_Search = new javax.swing.JTextField();
+        frmEditBook = new javax.swing.JFrame();
+        jLabel15 = new javax.swing.JLabel();
+        txtEditBook_Name = new javax.swing.JTextField();
+        jLabel16 = new javax.swing.JLabel();
+        txtEditBook_Author = new javax.swing.JTextField();
+        jLabel17 = new javax.swing.JLabel();
+        txtEditBook_Publisher = new javax.swing.JTextField();
+        jLabel18 = new javax.swing.JLabel();
+        txtEditBook_Location = new javax.swing.JTextField();
+        jLabel19 = new javax.swing.JLabel();
+        txtEditBook_Stock = new javax.swing.JTextField();
+        btnEditBook_Confirm = new javax.swing.JButton();
+        lblEditBook_Status = new javax.swing.JLabel();
+        grpViewMember_Sex = new javax.swing.ButtonGroup();
+        frmBookDetails = new javax.swing.JFrame();
+        jLabel20 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         txtUsername = new javax.swing.JTextField();
@@ -94,7 +120,16 @@ public class Library extends javax.swing.JFrame {
             new String [] {
                 "Book ID", "Name", "Author", "Publisher", "Location", "Available Stock"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        tblMain_BookList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane1.setViewportView(tblMain_BookList);
 
         mnuMain_MembMgmt.setText("Member Management");
@@ -117,8 +152,57 @@ public class Library extends javax.swing.JFrame {
 
         jMenuBar1.add(mnuMain_MembMgmt);
 
-        jMenu2.setText("Book Management");
-        jMenuBar1.add(jMenu2);
+        mnuMain_BookMgmt.setText("Book Management");
+
+        mnuMain_AddBook.setText("Add Book");
+        mnuMain_AddBook.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuMain_AddBookActionPerformed(evt);
+            }
+        });
+        mnuMain_BookMgmt.add(mnuMain_AddBook);
+
+        mnuMain_DelBook.setText("Delete Book");
+        mnuMain_DelBook.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuMain_DelBookActionPerformed(evt);
+            }
+        });
+        mnuMain_BookMgmt.add(mnuMain_DelBook);
+
+        mnuMain_EditBook.setText("Edit Book");
+        mnuMain_EditBook.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuMain_EditBookActionPerformed(evt);
+            }
+        });
+        mnuMain_BookMgmt.add(mnuMain_EditBook);
+
+        mnuMain_IssueBook.setText("Issue Book");
+        mnuMain_IssueBook.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuMain_IssueBookActionPerformed(evt);
+            }
+        });
+        mnuMain_BookMgmt.add(mnuMain_IssueBook);
+
+        mnuMain_ReturnBook.setText("Return Book");
+        mnuMain_ReturnBook.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuMain_ReturnBookActionPerformed(evt);
+            }
+        });
+        mnuMain_BookMgmt.add(mnuMain_ReturnBook);
+
+        mnuBookMgmt_Refresh.setText("Refresh List");
+        mnuBookMgmt_Refresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuBookMgmt_RefreshActionPerformed(evt);
+            }
+        });
+        mnuMain_BookMgmt.add(mnuBookMgmt_Refresh);
+
+        jMenuBar1.add(mnuMain_BookMgmt);
 
         frmMain.setJMenuBar(jMenuBar1);
 
@@ -261,7 +345,7 @@ public class Library extends javax.swing.JFrame {
                     .addComponent(jLabel8)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addGroup(frmAddMemberLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(frmAddMemberLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtAddMemb_PhNumb, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel9))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
@@ -306,9 +390,11 @@ public class Library extends javax.swing.JFrame {
         jLabel11.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel11.setText("Phone Number");
 
+        grpViewMember_Sex.add(radViewMemb_Male);
         radViewMemb_Male.setSelected(true);
         radViewMemb_Male.setText("Male");
 
+        grpViewMember_Sex.add(radViewMemb_Female);
         radViewMemb_Female.setText("Female");
 
         jLabel12.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
@@ -323,9 +409,19 @@ public class Library extends javax.swing.JFrame {
         jLabel13.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel13.setText("Name");
 
-        jButton1.setText("Update Details");
+        btnViewMember_Update.setText("Update Details");
+        btnViewMember_Update.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnViewMember_UpdateActionPerformed(evt);
+            }
+        });
 
-        jButton2.setText("Delete Member");
+        btnViewMember_Delete.setText("Delete Member");
+        btnViewMember_Delete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnViewMember_DeleteActionPerformed(evt);
+            }
+        });
 
         jLabel14.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel14.setText("Search");
@@ -387,9 +483,9 @@ public class Library extends javax.swing.JFrame {
                         .addContainerGap())
                     .addGroup(frmViewMemberLayout.createSequentialGroup()
                         .addGap(37, 37, 37)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnViewMember_Update, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnViewMember_Delete, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(47, 47, 47))))
         );
         frmViewMemberLayout.setVerticalGroup(
@@ -422,8 +518,8 @@ public class Library extends javax.swing.JFrame {
                             .addComponent(txtViewMemb_PhNumb, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(73, 73, 73)
                         .addGroup(frmViewMemberLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(btnViewMember_Update, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnViewMember_Delete, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(23, 23, 23))
                     .addGroup(frmViewMemberLayout.createSequentialGroup()
                         .addComponent(jScrollPane3)
@@ -432,6 +528,141 @@ public class Library extends javax.swing.JFrame {
 
         frmViewMember.pack();
         frmViewMember.setLocationRelativeTo(null);
+
+        frmEditBook.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        frmEditBook.addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                frmEditBookWindowClosing(evt);
+            }
+        });
+
+        jLabel15.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabel15.setText("Book Name");
+
+        jLabel16.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabel16.setText("Author");
+
+        jLabel17.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabel17.setText("Publisher");
+
+        jLabel18.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabel18.setText("Location");
+
+        txtEditBook_Location.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtEditBook_LocationKeyTyped(evt);
+            }
+        });
+
+        jLabel19.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabel19.setText("Stock");
+
+        txtEditBook_Stock.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtEditBook_StockKeyTyped(evt);
+            }
+        });
+
+        btnEditBook_Confirm.setText("Add/Edit book");
+        btnEditBook_Confirm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditBook_ConfirmActionPerformed(evt);
+            }
+        });
+
+        lblEditBook_Status.setFont(new java.awt.Font("Old English Text MT", 1, 36)); // NOI18N
+        lblEditBook_Status.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblEditBook_Status.setText("Add new Book");
+
+        javax.swing.GroupLayout frmEditBookLayout = new javax.swing.GroupLayout(frmEditBook.getContentPane());
+        frmEditBook.getContentPane().setLayout(frmEditBookLayout);
+        frmEditBookLayout.setHorizontalGroup(
+            frmEditBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(frmEditBookLayout.createSequentialGroup()
+                .addGroup(frmEditBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(frmEditBookLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(lblEditBook_Status, javax.swing.GroupLayout.PREFERRED_SIZE, 356, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(frmEditBookLayout.createSequentialGroup()
+                        .addGap(19, 19, 19)
+                        .addGroup(frmEditBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(frmEditBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addGroup(frmEditBookLayout.createSequentialGroup()
+                                    .addComponent(jLabel15)
+                                    .addGap(89, 89, 89)
+                                    .addComponent(txtEditBook_Name, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(frmEditBookLayout.createSequentialGroup()
+                                    .addComponent(jLabel16)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(txtEditBook_Author, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(frmEditBookLayout.createSequentialGroup()
+                                    .addComponent(jLabel17)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(txtEditBook_Publisher, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(frmEditBookLayout.createSequentialGroup()
+                                    .addComponent(jLabel18)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(txtEditBook_Location, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(frmEditBookLayout.createSequentialGroup()
+                                    .addComponent(jLabel19)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(txtEditBook_Stock, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(frmEditBookLayout.createSequentialGroup()
+                                .addGap(96, 96, 96)
+                                .addComponent(btnEditBook_Confirm, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        frmEditBookLayout.setVerticalGroup(
+            frmEditBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, frmEditBookLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblEditBook_Status, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(frmEditBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel15)
+                    .addComponent(txtEditBook_Name, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(frmEditBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel16)
+                    .addComponent(txtEditBook_Author, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(frmEditBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel17)
+                    .addComponent(txtEditBook_Publisher, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(frmEditBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel18)
+                    .addComponent(txtEditBook_Location, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(frmEditBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel19)
+                    .addComponent(txtEditBook_Stock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(btnEditBook_Confirm, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        frmEditBook.pack();
+        frmEditBook.setLocationRelativeTo(null);
+
+        jLabel20.setText("jLabel20");
+
+        javax.swing.GroupLayout frmBookDetailsLayout = new javax.swing.GroupLayout(frmBookDetails.getContentPane());
+        frmBookDetails.getContentPane().setLayout(frmBookDetailsLayout);
+        frmBookDetailsLayout.setHorizontalGroup(
+            frmBookDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(frmBookDetailsLayout.createSequentialGroup()
+                .addGap(152, 152, 152)
+                .addComponent(jLabel20)
+                .addContainerGap(208, Short.MAX_VALUE))
+        );
+        frmBookDetailsLayout.setVerticalGroup(
+            frmBookDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(frmBookDetailsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel20)
+                .addContainerGap(275, Short.MAX_VALUE))
+        );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setLocationByPlatform(true);
@@ -537,7 +768,8 @@ public class Library extends javax.swing.JFrame {
             conn.update("insert into members values(null, '" + name + "', '" + sex + "', '" + address + "', '" + number + "');"); // Passing null for the primary key will result in auto-increment of id
             // Find the id of the new member
             ResultSet rs = conn.query("select LAST_INSERT_ID()");
-            int id = rs.getInt(0);
+            rs.next();
+            int id = rs.getInt(1);
             JOptionPane.showMessageDialog(frmAddMember, "Successfully added new member.\n Member ID: " + id, "Success", JOptionPane.INFORMATION_MESSAGE);
             frmAddMember.setVisible(false);
             frmMain.setVisible(true);
@@ -592,6 +824,15 @@ public class Library extends javax.swing.JFrame {
     }//GEN-LAST:event_mnuMain_ViewMembActionPerformed
 
     private void lstViewMemb_ListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstViewMemb_ListValueChanged
+        if (lstViewMemb_List.getModel().getSize() == 0) {
+            txtViewMemb_Name.setText("");
+            txtViewMemb_Addr.setText("");
+            txtViewMemb_PhNumb.setText("");
+            radViewMemb_Male.setSelected(true);
+            return;
+        } else if (lstViewMemb_List.getModel().getSize() != 0 && lstViewMemb_List.getSelectedValues().length == 0) {
+            lstViewMemb_List.setSelectedIndex(0);
+        }
         Member memb = (Member) lstViewMemb_List.getSelectedValues()[0];
         int id = memb.id;
         try {
@@ -621,6 +862,258 @@ public class Library extends javax.swing.JFrame {
         frmMain.setVisible(true);
     }//GEN-LAST:event_frmViewMemberWindowClosed
 
+    private void mnuMain_DelBookActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuMain_DelBookActionPerformed
+        DefaultTableModel model = (DefaultTableModel) tblMain_BookList.getModel();
+        int row = tblMain_BookList.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(frmMain, "Select a book to delete!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (JOptionPane.showConfirmDialog(frmMain, "Are you sure want to delete the selected book?", "Delete book?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            int id = (Integer) ((Vector) model.getDataVector().get(row)).get(0);
+            String name = ((String) ((Vector) model.getDataVector().get(row)).get(1)).trim();
+            try {
+                ResultSet rs = conn.query("select bookid from borrowedBooks where bookid='" + id + "';");
+                if (!rs.next()) {
+                    conn.update("delete from books where id = '" + id + "';");
+                    JOptionPane.showMessageDialog(frmMain, "Successfully delete book '" + name + "'!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    populateBookListTable(txtMain_SearchBook.getText().trim());
+                } else {
+                    JOptionPane.showMessageDialog(frmMain, "This book is currently borrowed by a member! Cannot delete!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(frmMain, "Unknown database error. Failed to delete book.", "Database Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
+    }//GEN-LAST:event_mnuMain_DelBookActionPerformed
+
+    private void mnuMain_EditBookActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuMain_EditBookActionPerformed
+        DefaultTableModel model = (DefaultTableModel) tblMain_BookList.getModel();
+        int row = tblMain_BookList.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(frmMain, "Select a book to edit!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        int id = (Integer) ((Vector) model.getDataVector().get(row)).get(0);
+        try {
+            ResultSet rs = conn.query("select * from books where id = '" + id + "';");
+            lblEditBook_Status.setText("Edit Book");
+            rs.next();
+            txtEditBook_Name.setText(rs.getString("name"));
+            txtEditBook_Author.setText(rs.getString("author"));
+            txtEditBook_Publisher.setText(rs.getString("publisher"));
+            txtEditBook_Location.setText(rs.getString("location"));
+            txtEditBook_Stock.setText("" + rs.getInt("bookCount"));
+            btnEditBook_Confirm.setText("Edit Book");
+            curBookEdit = id;
+            bookAddOrEdit = 1;
+            frmEditBook.setVisible(true);
+            frmMain.setVisible(false);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(frmMain, "Unknown database error. Failed to edit book.", "Database Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_mnuMain_EditBookActionPerformed
+
+    private void frmEditBookWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_frmEditBookWindowClosing
+        if (JOptionPane.showConfirmDialog(frmEditBook, "Are you sure you want to close the window? Your changes won't be saved!", "Warning", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            frmEditBook.setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE);
+            frmMain.setVisible(true);
+        }
+    }//GEN-LAST:event_frmEditBookWindowClosing
+
+    private void btnEditBook_ConfirmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditBook_ConfirmActionPerformed
+        String name = txtEditBook_Name.getText();
+        String author = txtEditBook_Author.getText();
+        String publisher = txtEditBook_Publisher.getText();
+        String location = txtEditBook_Location.getText();
+        int stock = Integer.parseInt(txtEditBook_Stock.getText());
+        try {
+            if (bookAddOrEdit == 0) {
+                conn.update("insert into books values(null, '" + name + "', '" + author + "', '" + publisher + "', '" + location + "', '" + stock + "', '" + stock + "');");
+                JOptionPane.showMessageDialog(frmEditBook, "Book '" + name + "' has been sucessfully added!", "Book Added", JOptionPane.INFORMATION_MESSAGE);
+                frmEditBook.setVisible(false);
+                frmMain.setVisible(true);
+            } else if (bookAddOrEdit == 1) {
+                ResultSet rs = conn.query("select bookcount, instock from books where id='" + curBookEdit + "';");
+                if (rs.next()) {
+                    int booksLent = rs.getInt("bookcount") - rs.getInt("instock");
+                    int newStock = stock - rs.getInt("bookcount");
+                    if (booksLent > stock) {
+                        JOptionPane.showMessageDialog(frmEditBook, "The stock of this book will be less than the current lent number!\nMake sure the stock is greater than or equal to the number lent", "Error", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        conn.update("update books set name='" + name + "', author='" + author + "', publisher='" + publisher + "', location='" + location + "', bookCount='" + stock + "', instock=instock+" + newStock + " where id='" + curBookEdit + "';");
+                    }
+                }
+            }
+            populateBookListTable(txtMain_SearchBook.getText());
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(frmEditBook, "Unknown database error. Failed to edit book details.", "Database Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_btnEditBook_ConfirmActionPerformed
+
+    private void mnuBookMgmt_RefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuBookMgmt_RefreshActionPerformed
+        populateBookListTable(txtMain_SearchBook.getText());
+    }//GEN-LAST:event_mnuBookMgmt_RefreshActionPerformed
+
+    private void btnViewMember_DeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnViewMember_DeleteActionPerformed
+        if (lstViewMemb_List.getModel().getSize() == 0) {
+            txtViewMemb_Name.setText("");
+            txtViewMemb_Addr.setText("");
+            txtViewMemb_PhNumb.setText("");
+            radViewMemb_Male.setSelected(true);
+            return;
+        }
+        Member memb = (Member) lstViewMemb_List.getSelectedValues()[0];
+        int id = memb.id;
+        try {
+            conn.query("delete from members where id = '" + id + "';");
+            JOptionPane.showMessageDialog(frmViewMember, "Member '" + memb.name + "' has been deleted", "Member deleted", JOptionPane.INFORMATION_MESSAGE);
+            populateMemberViewList(txtViewMemb_Search.getText());
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(frmAddMember, "Unknown database error. Failed to delete member.", "Database Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_btnViewMember_DeleteActionPerformed
+
+    private void btnViewMember_UpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnViewMember_UpdateActionPerformed
+        if (lstViewMemb_List.getModel().getSize() == 0) {
+            txtViewMemb_Name.setText("");
+            txtViewMemb_Addr.setText("");
+            txtViewMemb_PhNumb.setText("");
+            radViewMemb_Male.setSelected(true);
+            return;
+        }
+        Member memb = (Member) lstViewMemb_List.getSelectedValues()[0];
+        int id = memb.id;
+        try {
+            String name = txtViewMemb_Name.getText();
+            String addr = txtViewMemb_Addr.getText();
+            String ph = txtViewMemb_PhNumb.getText();
+            int sex = radViewMemb_Male.isSelected() == true ? 0 : 1;
+            conn.query("update members set name='" + name + "', address='" + addr + "', phone='" + ph + "', sex='" + sex + "' where id = '" + id + "';");
+            JOptionPane.showMessageDialog(frmViewMember, "Member '" + memb.name + "' has been updated!", "Member deleted", JOptionPane.INFORMATION_MESSAGE);
+            populateMemberViewList(txtViewMemb_Search.getText());
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(frmAddMember, "Unknown database error. Failed to update member details.", "Database Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_btnViewMember_UpdateActionPerformed
+
+    private void mnuMain_AddBookActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuMain_AddBookActionPerformed
+        lblEditBook_Status.setText("Add New Book");
+        txtEditBook_Name.setText("");
+        txtEditBook_Author.setText("");
+        txtEditBook_Publisher.setText("");
+        txtEditBook_Stock.setText("");
+        txtEditBook_Location.setText("");
+        btnEditBook_Confirm.setText("Add book");
+        frmEditBook.setVisible(true);
+        frmMain.setVisible(false);
+        bookAddOrEdit = 0;
+    }//GEN-LAST:event_mnuMain_AddBookActionPerformed
+
+    private void txtEditBook_StockKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtEditBook_StockKeyTyped
+        if (!Character.isDigit(evt.getKeyChar())) {
+            evt.consume();
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_txtEditBook_StockKeyTyped
+
+    private void txtEditBook_LocationKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtEditBook_LocationKeyTyped
+        if (txtEditBook_Location.getText().length() == 2) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtEditBook_LocationKeyTyped
+
+    private void mnuMain_IssueBookActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuMain_IssueBookActionPerformed
+        DefaultTableModel model = (DefaultTableModel) tblMain_BookList.getModel();
+        int row = tblMain_BookList.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(frmMain, "Select a book to issue!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        int userId = Integer.parseInt(JOptionPane.showInputDialog(frmMain, "Enter user ID", "Book Issue", JOptionPane.INFORMATION_MESSAGE));
+        int bookId = (Integer) ((Vector) model.getDataVector().get(row)).get(0);
+        int available = (Integer) ((Vector) model.getDataVector().get(row)).get(5);
+        String bookName = (String) ((Vector) model.getDataVector().get(row)).get(1);
+        if (available <= 0) {
+            JOptionPane.showMessageDialog(frmMain, "This book is not available for lending!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        try {
+            ResultSet rs = conn.query("select name from members where id='" + userId + "';");
+            if (rs.next()) {
+                String name = rs.getString(1);
+                rs = conn.query("select * from borrowedBooks where bookId='" + bookId + "' and userId = '" + userId + "' and issued='" + 1 + "';");
+                if (!rs.next()) {
+                    // This book isn't currently borrowed by the user, issue it
+                    conn.update("update borrowedBooks set bookId='" + bookId + "', userId='" + userId + "', dateofissue=date(now()), dateofreturn=date(now()) + 7, issued=1");
+                    conn.update("update books set inStock = inStock - 1 where id='" + bookId + "';");
+                    populateBookListTable(txtMain_SearchBook.getText());
+                    JOptionPane.showMessageDialog(frmMain, "Book '" + bookName + "' has been issued to " + name + "!");
+                } else {
+                    JOptionPane.showMessageDialog(frmMain, "This book has already been borrowed by the user!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(frmMain, "Invalid user ID!!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Unknown database error. Failed to issue book.", "Database Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_mnuMain_IssueBookActionPerformed
+
+    private void mnuMain_ReturnBookActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuMain_ReturnBookActionPerformed
+        DefaultTableModel model = (DefaultTableModel) tblMain_BookList.getModel();
+        int row = tblMain_BookList.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(frmMain, "Select a book to issue!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        int userId = Integer.parseInt(JOptionPane.showInputDialog(frmMain, "Enter user ID", "Book Issue", JOptionPane.INFORMATION_MESSAGE));
+        int bookId = (Integer) ((Vector) model.getDataVector().get(row)).get(0);
+        int available = (Integer) ((Vector) model.getDataVector().get(row)).get(5);
+        String bookName = (String) ((Vector) model.getDataVector().get(row)).get(1);
+        try {
+            ResultSet rs = conn.query("select name from members where id='" + userId + "';");
+            if (rs.next()) {
+                String name = rs.getString(1);
+                rs = conn.query("select * from borrowedBooks where bookId='" + bookId + "' and userId='" + bookId + "';");
+                if (rs.next()) {
+                    if (rs.getInt("issued") == 1) {
+                        Date returnDate = rs.getDate("dateOfReturn");
+                        Date today = new Date(System.currentTimeMillis());
+                        int fine = 0;
+                        if (today.after(returnDate)) {
+                            long diffEpoch = today.getTime() - returnDate.getTime();
+                            long diffDays = diffEpoch / 86400000; // Divisor is the number of milliseconds in a day
+                            fine = (int) diffDays * 25; // Rs 25 a day
+                        }                        
+                        
+                        conn.update("update borrowedBooks set issued = 0 where userId='" +userId + "' and bookId = '" + bookId + "';");
+                        conn.update("update books set instock = instock + 1 where id='" + bookId + "';");
+                        populateBookListTable(txtMain_SearchBook.getText());
+                        String confirmMsg = "Book '" + bookName + "' has been sucessfully returned by " + name;
+                        if (fine != 0) {
+                            confirmMsg += "\nPlease collect a fine of Rs " + fine + " for late return of the book!";
+                        }
+                        JOptionPane.showMessageDialog(frmMain, confirmMsg, "Book returned", JOptionPane.INFORMATION_MESSAGE);
+                        
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(frmMain, "This member hasn't borrowed the selected book!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(frmMain, "Invalid user ID!!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Unknown database error. Failed to return book.", "Database Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_mnuMain_ReturnBookActionPerformed
+
     private void populateBookListTable(String wildcard) {
         clearBookListTable();
         if (wildcard.trim().compareTo("") == 0) {
@@ -639,7 +1132,7 @@ public class Library extends javax.swing.JFrame {
 
     private void populateMemberViewList(String wildcard) {
         clearMemberViewList();
-        if (wildcard.trim().compareTo("") == 0) {
+        if (wildcard.trim().compareTo("Search by Name") == 0 || wildcard.trim().compareTo("") == 0) {
             wildcard = "%";
         }
         try {
@@ -707,19 +1200,29 @@ public class Library extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddMemb_Add;
+    private javax.swing.JButton btnEditBook_Confirm;
+    private javax.swing.JButton btnViewMember_Delete;
+    private javax.swing.JButton btnViewMember_Update;
     private javax.swing.JButton cmdLogin;
     private javax.swing.JFrame frmAddMember;
+    private javax.swing.JFrame frmBookDetails;
+    private javax.swing.JFrame frmEditBook;
     private javax.swing.JFrame frmMain;
     private javax.swing.JFrame frmViewMember;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.ButtonGroup grpViewMember_Sex;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -727,16 +1230,23 @@ public class Library extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JLabel lblEditBook_Status;
     private javax.swing.JLabel lblMain_Welcome;
     private javax.swing.JList lstViewMemb_List;
+    private javax.swing.JMenuItem mnuBookMgmt_Refresh;
+    private javax.swing.JMenuItem mnuMain_AddBook;
     private javax.swing.JMenuItem mnuMain_AddMemb;
+    private javax.swing.JMenu mnuMain_BookMgmt;
+    private javax.swing.JMenuItem mnuMain_DelBook;
+    private javax.swing.JMenuItem mnuMain_EditBook;
+    private javax.swing.JMenuItem mnuMain_IssueBook;
     private javax.swing.JMenu mnuMain_MembMgmt;
+    private javax.swing.JMenuItem mnuMain_ReturnBook;
     private javax.swing.JMenuItem mnuMain_ViewMemb;
     private javax.swing.JRadioButton radAddMemb_Female;
     private javax.swing.JRadioButton radAddMemb_Male;
@@ -746,6 +1256,11 @@ public class Library extends javax.swing.JFrame {
     private javax.swing.JTextArea txtAddMemb_Addr;
     private javax.swing.JTextField txtAddMemb_Name;
     private javax.swing.JTextField txtAddMemb_PhNumb;
+    private javax.swing.JTextField txtEditBook_Author;
+    private javax.swing.JTextField txtEditBook_Location;
+    private javax.swing.JTextField txtEditBook_Name;
+    private javax.swing.JTextField txtEditBook_Publisher;
+    private javax.swing.JTextField txtEditBook_Stock;
     private javax.swing.JTextField txtMain_SearchBook;
     private javax.swing.JPasswordField txtPassword;
     private javax.swing.JTextField txtUsername;
