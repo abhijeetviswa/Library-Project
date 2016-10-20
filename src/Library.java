@@ -1049,7 +1049,8 @@ public class Library extends javax.swing.JFrame {
                 rs = conn.query("select * from borrowedBooks where bookId='" + bookId + "' and userId = '" + userId + "' and issued='" + 1 + "';");
                 if (!rs.next()) {
                     // This book isn't currently borrowed by the user, issue it
-                    conn.update("update borrowedBooks set bookId='" + bookId + "', userId='" + userId + "', dateofissue=date(now()), dateofreturn=date(now()) + 7, issued=1");
+                    conn.update("insert into borrowedBooks values('" + bookId + "', '" + userId + "', now(), now() + 7, 1);");
+                    //conn.update("update borrowedBooks set bookId='" + bookId + "', userId='" + userId + "', dateofissue=date(now()), dateofreturn=date(now()) + 7, issued=1 where bookId='" + bookId+"' and userId='" + userId + "';");
                     conn.update("update books set inStock = inStock - 1 where id='" + bookId + "';");
                     populateBookListTable(txtMain_SearchBook.getText());
                     JOptionPane.showMessageDialog(frmMain, "Book '" + bookName + "' has been issued to " + name + "!");
@@ -1080,7 +1081,7 @@ public class Library extends javax.swing.JFrame {
             ResultSet rs = conn.query("select name from members where id='" + userId + "';");
             if (rs.next()) {
                 String name = rs.getString(1);
-                rs = conn.query("select * from borrowedBooks where bookId='" + bookId + "' and userId='" + bookId + "';");
+                rs = conn.query("select * from borrowedBooks where bookId='" + bookId + "' and userId='" + userId + "';");
                 if (rs.next()) {
                     if (rs.getInt("issued") == 1) {
                         Date returnDate = rs.getDate("dateOfReturn");
@@ -1090,9 +1091,10 @@ public class Library extends javax.swing.JFrame {
                             long diffEpoch = today.getTime() - returnDate.getTime();
                             long diffDays = diffEpoch / 86400000; // Divisor is the number of milliseconds in a day
                             fine = (int) diffDays * 25; // Rs 25 a day
-                        }                        
-                        
-                        conn.update("update borrowedBooks set issued = 0 where userId='" +userId + "' and bookId = '" + bookId + "';");
+                        }
+
+                        conn.update("delete from borrowedBooks where userId='" + userId + "' and bookId='" + bookId + "';");
+                        //conn.update("update borrowedBooks set issued = 0 where userId='" +userId + "' and bookId = '" + bookId + "';");
                         conn.update("update books set instock = instock + 1 where id='" + bookId + "';");
                         populateBookListTable(txtMain_SearchBook.getText());
                         String confirmMsg = "Book '" + bookName + "' has been sucessfully returned by " + name;
@@ -1100,7 +1102,7 @@ public class Library extends javax.swing.JFrame {
                             confirmMsg += "\nPlease collect a fine of Rs " + fine + " for late return of the book!";
                         }
                         JOptionPane.showMessageDialog(frmMain, confirmMsg, "Book returned", JOptionPane.INFORMATION_MESSAGE);
-                        
+
                     }
                 } else {
                     JOptionPane.showMessageDialog(frmMain, "This member hasn't borrowed the selected book!", "Error", JOptionPane.ERROR_MESSAGE);
